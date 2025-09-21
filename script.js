@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   const bioMessages = [
-    "i dont mod games anymore",
+    "i dont  games anymore",
     "\"i make games\""
   ];
   let bioText = '';
