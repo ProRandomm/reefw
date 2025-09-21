@@ -213,9 +213,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   const bioMessages = [
-    "i dont mod games anymore",
-    "\i make games\/"
-    "not my clip in the back"
+    "i dont mod games anymore"
+    "i make games"
+    "not my clip in the back",
   ];
   let bioText = '';
   let bioIndex = 0;
