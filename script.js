@@ -213,8 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   const bioMessages = [
-    "67 so tuff",
-    "\"Whats A Bool\""
+    "i dont mod games anymore",
+    "\"i make games\""
   ];
   let bioText = '';
   let bioIndex = 0;
