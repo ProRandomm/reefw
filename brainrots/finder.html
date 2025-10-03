@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🐾 Brainrot Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ff66cc" />
+  <style>
+    :root{
+      --bg:#0f0f12;--panel:#17171b;--panel-2:#1e1e24;--text:#f7f7fb;
+      --muted:#b7b7c7;--accent:#ff66cc;--accent-2:#8a63ff;--success:#57e39b;
+      --shadow:0 10px 24px rgba(0,0,0,.35),0 2px 8px rgba(0,0,0,.25);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:radial-gradient(1200px 800px at 80% -10%, rgba(255,102,204,.08), transparent 60%),
+                   radial-gradient(900px 600px at 10% 110%, rgba(138,99,255,.10), transparent 55%),
+                   var(--bg);
+      color:var(--text);font:500 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      display:flex;justify-content:center;padding:16px;
+    }
+
+    .wrap{width:min(1000px, 100%);}
+
+    .header{
+      display:flex;gap:12px;align-items:center;justify-content:space-between;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      padding:14px 16px;border-radius:16px;box-shadow:var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{
+      width:36px;height:36px;border-radius:10px;background:
+        linear-gradient(135deg, var(--accent), var(--accent-2));
+      display:grid;place-items:center;box-shadow:0 6px 16px rgba(255,102,204,.35);
+      font-weight:900;color:#fff;
+    }
+    .title{display:flex;flex-direction:column}
+    .title h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .title span{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{
+      border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      color:var(--text);padding:10px 12px; border-radius:12px; cursor:pointer;
+      font-weight:600;transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      box-shadow:0 6px 14px rgba(0,0,0,.25);
+      display:flex;align-items:center;gap:8px; text-decoration:none;
+    }
+    .btn:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.16)}
+    .btn.accent{
+      background:linear-gradient(135deg, var(--accent), #ff87d7);
+      border-color:transparent; color:white;
+      box-shadow:0 10px 18px rgba(255,102,204,.35);
+    }
+    .pill{
+      padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);font-size:12px;color:var(--muted)
+    }
+
+    .board{
+      margin-top:12px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:14px;
+    }
+
+    .server-meta{
+      display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;margin-bottom:8px
+    }
+    .meta-side{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .join-link.btn{padding:10px 14px}
+
+    .grid{
+      display:grid;gap:12px;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+    @media (max-width: 420px){
+      .grid{grid-template-columns: repeat(2, minmax(0,1fr))}
+    }
+
+    .card{
+      background:linear-gradient(180deg, var(--panel), var(--panel-2));
+      border:1px solid rgba(255,255,255,.08); border-radius:16px; overflow:hidden;
+      box-shadow:0 8px 18px rgba(0,0,0,.28); transition:transform .12s ease, border-color .12s ease;
+      display:flex;flex-direction:column;min-height:190px
+    }
+    .card:hover{transform:translateY(-2px); border-color:rgba(255,255,255,.16)}
+    .img-wrap{position:relative; background:#0c0c10}
+    .img-wrap::after{
+      content:""; position:absolute; inset:0; background:radial-gradient(800px 400px at 50% 0, rgba(255,102,204,.12), transparent 55%);
+      pointer-events:none;
+    }
+    .img{
+      width:100%; height:110px; object-fit:contain; display:block; padding:8px;
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.06));
+    }
+    .body{padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px}
+    .name{font-weight:700; font-size:14px; line-height:1.2}
+    .count{
+      background:rgba(87,227,155,.12); color:#7ff0bd; border:1px solid rgba(87,227,155,.25);
+      font-weight:800; padding:6px 8px; border-radius:12px; min-width:36px; text-align:center;
+    }
+
+    .empty{
+      padding:26px;text-align:center;color:var(--muted);
+    }
+
+    /* Toasts */
+    .toasts{position:fixed; right:12px; bottom:12px; display:flex; flex-direction:column; gap:8px; z-index:30; max-width:min(92vw, 380px)}
+    .toast{
+      background:#15151a; border:1px solid rgba(255,255,255,.08); border-left:5px solid var(--accent);
+      border-radius:12px; padding:12px 14px; box-shadow:var(--shadow); color:var(--text);
+      animation:slideUp .2s ease both;
+    }
+    .toast small{display:block;color:var(--muted);margin-top:6px}
+    @keyframes slideUp{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+    /* Mobile helpers */
+    @media (max-width:640px){
+      .header{padding:12px}
+      .title h1{font-size:16px}
+      .btn{padding:9px 10px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">🧠</div>
+        <div class="title">
+          <h1>Brainrot Tracker</h1>
+          <span id="status">Polling…</span>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="voiceBtn" class="btn">🔊 Enable Voice</button>
+        <button id="notifBtn" class="btn">🔔 Enable Notifications</button>
+        <a id="joinCta" href="#" target="_blank" rel="noopener" class="btn accent" style="display:none">🌐 Click to Join</a>
+      </div>
+    </div>
+
+    <div class="board">
+      <div class="server-meta">
+        <div class="meta-side">
+          <span id="serverInfo" class="pill">Server: —</span>
+          <span id="playersInfo" class="pill">Players: —</span>
+        </div>
+        <div class="meta-side">
+          <span id="updatedInfo" class="pill">Updated: —</span>
+        </div>
+      </div>
+
+      <div id="grid" class="grid"></div>
+      <div id="empty" class="empty" style="display:none">Waiting for pets…</div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+
+  <script>
+    const API_URL = "https://scaling-dollop-olive.vercel.app/api/pets";
+
+    const grid = document.getElementById("grid");
+    const empty = document.getElementById("empty");
+    const joinCta = document.getElementById("joinCta");
+    const serverInfo = document.getElementById("serverInfo");
+    const playersInfo = document.getElementById("playersInfo");
+    const updatedInfo = document.getElementById("updatedInfo");
+    const statusEl = document.getElementById("status");
+    const toasts = document.getElementById("toasts");
+
+    const voiceBtn = document.getElementById("voiceBtn");
+    const notifBtn = document.getElementById("notifBtn");
+
+    let ttsEnabled = false;
+    let voicePreferred = null;
+    let prevSnapshotKey = "";
+    let prevPetNames = [];
+
+    function pickVoice() {
+      const voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+      voicePreferred =
+        voices.find(v => /female|woman|samantha|google uk english female/i.test(v.name)) ||
+        voices[0] || null;
+    }
+    if ("speechSynthesis" in window) {
+      speechSynthesis.onvoiceschanged = pickVoice;
+      pickVoice();
+    }
+
+    voiceBtn.addEventListener("click", () => {
+      ttsEnabled = true;
+      speak("Voice enabled. Waiting for brain rots.");
+      voiceBtn.style.display = "none";
+    });
+
+    notifBtn.addEventListener("click", async () => {
+      if (!("Notification" in window)) return toast("Notifications not supported in this browser.");
+      try {
+        const perm = await Notification.requestPermission();
+        if (perm === "granted") {
+          toast("Notifications enabled.");
+          notifBtn.style.display = "none";
+          notify("Brainrot Tracker", { body: "Notifications enabled." });
+        } else {
+          toast("Notifications blocked.");
+        }
+      } catch {
+        toast("Notifications request failed.");
+      }
+    });
+
+    function notify(title, opts = {}) {
+      if (!("Notification" in window)) return;
+      if (Notification.permission !== "granted") return;
+      try { new Notification(title, Object.assign({ icon: "data:image/png;base64,iVBORw0KGgo=" }, opts)); } catch {}
+    }
+
+    function toast(msg) {
+      const el = document.createElement("div");
+      el.className = "toast";
+      el.innerHTML = msg;
+      toasts.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(6px)";
+        setTimeout(() => el.remove(), 200);
+      }, 4000);
+    }
+
+    function speak(text) {
+      if (!ttsEnabled || !("speechSynthesis" in window)) return;
+      const u = new SpeechSynthesisUtterance(text);
+      if (voicePreferred) u.voice = voicePreferred;
+      u.rate = 1; u.pitch = 1.15;
+      speechSynthesis.speak(u);
+    }
+
+    function petCard({name, count, image}) {
+      const url = image || "https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg";
+      return `
+        <div class="card">
+          <div class="img-wrap">
+            <img class="img" src="${url}" alt="${name}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/3/3f/Placeholder_view_vector.svg'">
+          </div>
+          <div class="body">
+            <div class="name">${name}</div>
+            <div class="count">${count || 1}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSnapshot(data){
+      const pets = (data && data.pets) ? data.pets : [];
+      const names = pets.map(p=>p.name).sort((a,b)=>a.localeCompare(b));
+      const snapshotKey = names.join("|");
+
+      // Update header/meta
+      const place = data && data.placeId ? data.placeId : "—";
+      const job = data && data.jobId ? data.jobId : "—";
+      serverInfo.textContent = `Server: ${String(job).slice(0,8)}…`;
+      if (data && data.players) {
+        playersInfo.textContent = `Players: ${data.players.current ?? "?"}/${data.players.max ?? "?"}`;
+      } else {
+        playersInfo.textContent = "Players: —";
+      }
+      updatedInfo.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+
+      // Join link CTA
+      if (data && data.joinLink) {
+        joinCta.href = data.joinLink;
+        joinCta.style.display = "";
+      } else {
+        joinCta.style.display = "none";
+      }
+
+      // Notice (player left) passthrough as a toast/notification
+      if (data && data.notice) {
+        toast(data.notice);
+        notify("Brainrot notice", { body: data.notice });
+      }
+
+      // If empty list, show placeholder; otherwise render cards
+      if (!pets.length) {
+        grid.innerHTML = "";
+        empty.style.display = "";
+        statusEl.textContent = "Waiting…";
+        prevSnapshotKey = snapshotKey;
+        prevPetNames = names;
+        return;
+      } else {
+        empty.style.display = "none";
+        statusEl.textContent = `Tracking ${pets.length} brainrot${pets.length>1?"s":""}`;
+      }
+
+      // If changed, replace the grid and announce new pets
+      if (snapshotKey !== prevSnapshotKey) {
+        const prevSet = new Set(prevPetNames);
+        const newOnes = names.filter(n => !prevSet.has(n));
+        if (newOnes.length) {
+          const label = newOnes.length === 1 ? "New Brain Rot Found" : "New Brain Rots Found";
+          const body = newOnes.join(", ");
+          toast(`<strong>${label}:</strong> ${body}`);
+          notify(label, { body });
+          speak(`${label}: ${body}`);
+        }
+        grid.innerHTML = pets.map(petCard).join("");
+        prevSnapshotKey = snapshotKey;
+        prevPetNames = names;
+      }
+    }
+
+    async function tick(){
+      try{
+        const res = await fetch(API_URL, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP "+res.status);
+        const data = await res.json();
+        renderSnapshot(data);
+      }catch(e){
+        statusEl.textContent = "Offline – retrying…";
+      }
+    }
+
+    // First paint
+    tick();
+    // Polling
+    setInterval(tick, 2500);
+  </script>
+</body>
+</html>
